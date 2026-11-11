@@ -12,7 +12,7 @@ import UniformTypeIdentifiers
         let root=FileManager.default.urls(for:.applicationSupportDirectory,in:.userDomainMask)[0].appendingPathComponent("MangaDirectionStudio",isDirectory:true)
         url=root.appendingPathComponent("project.json")
         do{try FileManager.default.createDirectory(at:root,withIntermediateDirectories:true);if FileManager.default.fileExists(atPath:url.path){let p=try JSONDecoder().decode(StageProject.self,from:Data(contentsOf:url));guard p.isValid else{throw CocoaError(.fileReadCorruptFile)};project=p}}
-        catch{readFailed=true;error="保存データを読み込めません。元のファイルは保持しています。"}
+        catch{readFailed=true;self.error="保存データを読み込めません。元のファイルは保持しています。"}
     }
     var panel:StagePanel {project.panels[min(selected,project.panels.count-1)]}
     func change(_ edit:(inout StageProject)->Void){
