@@ -1,0 +1,33 @@
+name: Manga direction validation
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Model checks
+        run: |
+          swiftc MangaDirectionStudio/StageModel.swift Tests/main.swift -o "$RUNNER_TEMP/tests"
+          "$RUNNER_TEMP/tests"
+      - name: Build and test
+        run: |
+          command -v xcodegen || brew install xcodegen
+          xcodegen generate
+          mkdir -p artifacts
+          xcrun simctl list devices available -j > /tmp/devices.json
+          DEVICE=$(python3 -c 'import json;print(next(d["udid"] for r,ds in json.load(open("/tmp/devices.json"))["devices"].items() if "iOS" in r for d in ds if "iPhone" in d["name"] and "Pro Max" in d["name"]))')
+          xcodebuild test -project MangaDirectionStudio.xcodeproj -scheme MangaDirectionStudio -destination "platform=iOS Simulator,id=$DEVICE" -derivedDataPath build CODE_SIGNING_ALLOWED=NO > artifacts/test.log 2>&1
+          find "$HOME/Library/Developer/CoreSimulator/Devices" -type d -name stage-artifacts -exec cp -R {} artifacts/ \;
+      - name: Collect render samples
+        if: always()
+        run: find "$HOME/Library/Developer/CoreSimulator/Devices" -type d -name stage-artifacts -exec cp -R {} artifacts/ \;
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: manga-stage-validation
+          path: artifacts
