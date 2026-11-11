@@ -31,9 +31,12 @@ import UniformTypeIdentifiers
 struct ExportFile:Identifiable {let id=UUID();let url:URL}
 struct WorkshopView:View {
     @StateObject private var store=StageStore()
-    @State private var actor=0,tab=0
+    @State private var actor=0
+    @State private var tab=0
     @State private var share:ExportFile?
-    @State private var importing=false,removing=false,showPage=false
+    @State private var importing=false
+    @State private var removing=false
+    @State private var showPage=false
     @State private var orbitStart:StageCamera?
     @Environment(\.horizontalSizeClass) private var sizeClass
     private let ink=Color(red:0.18,green:0.25,blue:0.36)
